@@ -46,12 +46,12 @@
  ### Pin Map Recap - CMG001A ###
  D0: 
  D1: 
- D2-D7: LCD
- D8: buzzer
- D9: progression switch (linear or f/stop) - maybe superfluous?
- D10: Relay signal
- D11, D12, A0-A6: 4x4 keypad
+ D(2, 3, 4, 5, 6, 7, 8, 9): Keypad
+ D10: progression switch (linear or f/stop) - maybe superfluous? 
+ D11: Relay
+ D12: Buzzer
  D13: main button (pedal/pushbutton)
+ A0-A6: LCD
 
  created  11 Nov 2013
  by Daniele Lucarelli
@@ -77,23 +77,23 @@
 #if 0 == MYMODEL
   // defines for LED Bar. They're set on pins 2-3, change accordingly
   // if you wired the LED Bar to another location
-  #define LEDBar_DDRData  DDRD
-  #define LEDBar_DDRClk   DDRD
-  #define LEDBar_PORTData PORTD
-  #define LEDBar_PORTClk  PORTD
-  #define LEDBar_BITData  0x04
-  #define LEDBar_BITClk   0x08
+  #define LEDBar_DDRData  DDRC
+  #define LEDBar_DDRClk   DDRC
+  #define LEDBar_PORTData PORTC
+  #define LEDBar_PORTClk  PORTC
+  #define LEDBar_BITData  0x01
+  #define LEDBar_BITClk   0x02
   #define CmdMode         0x0000  //Work on 8-bit mode
   #define ON              0x00ff  //8-bit 1 data
   #define SHUT            0x0000  //8-bit 0 data
   // end defines for LCD Bar
   #include <SoftwareSerial.h>
   SoftwareSerial Serial7Segment(1,A2);
-  const byte lcdrxpin = 4;
+  const byte lcdrxpin = A2;
   const byte brightness = 16;  // change this to control 7-Segment brightness
 #elif 1 == MYMODEL
   #include <LiquidCrystal.h>
-  LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
+  LiquidCrystal lcd(A0, A1, A2, A3, A4, A5);
 #endif
 
 // define wired pins
@@ -715,16 +715,15 @@ void setup() {
   // init LED Bar
   LEDBar_DDRData |= LEDBar_BITData;
   LEDBar_DDRClk |= LEDBar_BITClk;
-  pinMode(lcdrxpin, OUTPUT);
 #endif
 
-  /* ensure analog pins are set to INPUT */
+  /* ensure analog pins are set to OUTPUT */
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
   pinMode(A2, OUTPUT);
-  pinMode(A3, INPUT);
-  pinMode(A4, INPUT);
-  pinMode(A5, INPUT);
+  pinMode(A3, OUTPUT);
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
   pinMode(buzzer, OUTPUT);      // Buzzer pin in Output
   pinMode(relay, OUTPUT);      // Relé pin in Output
   pinMode(mainbtn, INPUT);       // Pedale/pulsante pin in Input
