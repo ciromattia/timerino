@@ -86,8 +86,8 @@
   #define SHUT            0x0000  //8-bit 0 data
   // end defines for LCD Bar
   #include <SoftwareSerial.h>
-  SoftwareSerial Serial7Segment(0, 5);
-  const byte lcdrxpin = 5;
+  SoftwareSerial Serial7Segment(1,4);
+  const byte lcdrxpin = 4;
   const byte brightness = 16;  // change this to control 7-Segment brightness
 #elif 1 == MYMODEL
   #include <LiquidCrystal.h>
@@ -200,7 +200,7 @@ void setup_display() {
     LEDBar_set_LED_Index(0b000001111111111);
     // Setup 7SegmentDisplay
     Serial7Segment.begin(9600); // Connect to 7-Segment display in serial mode
-    Serial7Segment.write('v'); // Display reset - brings cursors to the first char
+    Serial7Segment.write(0x76); // Display reset - brings cursors to the first char
     Serial7Segment.write(0x7A);  // Brightness control command
     Serial7Segment.write((byte) brightness);
     Serial7Segment.write('A');
@@ -215,29 +215,29 @@ void setup_display() {
     Serial7Segment.write('L');
     LEDBar_set_LED_Index(0b000000000111111);
     delay(scrollTime);
-    Serial7Segment.write("NALO");
+    Serial7Segment.print("NALO");
     LEDBar_set_LED_Index(0b000000000011111);
     delay(scrollTime);
-    Serial7Segment.write("ALOG");
+    Serial7Segment.print("ALOG");
     LEDBar_set_LED_Index(0b000000000001111);
     delay(scrollTime);
-    Serial7Segment.write("LOGI");
+    Serial7Segment.print("LOGI");
     LEDBar_set_LED_Index(0b000000000000111);
     delay(scrollTime);
-    Serial7Segment.write("OGIC");
+    Serial7Segment.print("OGIC");
     LEDBar_set_LED_Index(0b000000000000011);
     delay(scrollTime);
-    Serial7Segment.write("GICA");
+    Serial7Segment.print("GICA");
     Serial7Segment.write(0x77);
     Serial7Segment.write(0b00001000);
     LEDBar_set_LED_Index(0b000000000000001);
     delay(scrollTime);
-    Serial7Segment.write("ICAI");
+    Serial7Segment.print("ICAI");
     Serial7Segment.write(0x77);
     Serial7Segment.write(0b00000100);
     LEDBar_set_LED_Index(0b000000000000000);
     delay(scrollTime);
-    Serial7Segment.write("CAIT");
+    Serial7Segment.print("CAIT");
     Serial7Segment.write(0x77);
     Serial7Segment.write(0b00000010);
     LEDBar_set_LED_Index(0b000001000000000);
@@ -246,23 +246,23 @@ void setup_display() {
     delay(scrollTime);
     LEDBar_set_LED_Index(0b000001000000000);
     delay(scrollTime);
-    Serial7Segment.write("AIT ");
+    Serial7Segment.print("AIT ");
     Serial7Segment.write(0x77);
     Serial7Segment.write(0b00000001);
     LEDBar_set_LED_Index(0b000000000000000);
     delay(scrollTime);
-    Serial7Segment.write("IT  ");
+    Serial7Segment.print("IT  ");
     Serial7Segment.write(0x77);
     Serial7Segment.write(0b01000000);
     LEDBar_set_LED_Index(0b000001000000000);
     delay(scrollTime);
-    Serial7Segment.write("T  0");      
+    Serial7Segment.print("T  0");      
     LEDBar_set_LED_Index(0b000000000000000);
     delay(scrollTime);
-    Serial7Segment.write("  00");
+    Serial7Segment.print("  00");
     LEDBar_set_LED_Index(0b000001000000000);
     delay(scrollTime);
-    Serial7Segment.write(" 000");
+    Serial7Segment.print(" 000");
     LEDBar_set_LED_Index(0b000000000000000);  
     delay(scrollTime);
     reset();
@@ -285,8 +285,8 @@ void setup_display() {
 
 void say_reset() {
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("0000");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("0000");
     Serial7Segment.write(0x77);
     Serial7Segment.write(0b00000100);
   #elif 1 == MYMODEL
@@ -296,6 +296,7 @@ void say_reset() {
 }
 void say_clearprecis() {
   #if 0 == MYMODEL
+    LEDBar_set_LED_Index(0b000000000000000);
     say_reset();
   #elif 1 == MYMODEL
     lcd.setCursor(12,1);
@@ -327,47 +328,47 @@ void say_time() {
 void say_prec() {
   say_clearprecis();
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
+    Serial7Segment.write(0x76);
     switch (precis) {
       case 1:
         LEDBar_set_LED_Index(0b000001000000000);
-        Serial7Segment.write("1-1 ");
+        Serial7Segment.print("1-1 ");
         break;
       case 2:
         LEDBar_set_LED_Index(0b000000100000000);
-        Serial7Segment.write("1-2 ");
+        Serial7Segment.print("1-2 ");
         break;
       case 3:
         LEDBar_set_LED_Index(0b000000010000000);
-        Serial7Segment.write("1-3 ");
+        Serial7Segment.print("1-3 ");
         break;
       case 4:
         LEDBar_set_LED_Index(0b000000001000000);
-        Serial7Segment.write("1-4 ");
+        Serial7Segment.print("1-4 ");
         break;
       case 6:
         LEDBar_set_LED_Index(0b000000000100000);
-        Serial7Segment.write("1-6 ");
+        Serial7Segment.print("1-6 ");
         break;
       case 8:
         LEDBar_set_LED_Index(0b000000000010000);
-        Serial7Segment.write("1-8 ");
+        Serial7Segment.print("1-8 ");
         break;
       case 12:
         LEDBar_set_LED_Index(0b000000000001000);
-        Serial7Segment.write("1-12");
+        Serial7Segment.print("1-12");
         break;
       case 24:
         LEDBar_set_LED_Index(0b000000000000100);
-        Serial7Segment.write("1-24");
+        Serial7Segment.print("1-24");
         break;
       case 32:
         LEDBar_set_LED_Index(0b000000000000010);
-        Serial7Segment.write("1-32");
+        Serial7Segment.print("1-32");
         break;
       case 48:
         LEDBar_set_LED_Index(0b000000000000001);
-        Serial7Segment.write("1-48");
+        Serial7Segment.print("1-48");
         break;
     }
   #elif 1 == MYMODEL
@@ -388,68 +389,68 @@ void say_prec() {
 
 void say_free() {
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("LINE");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("LINE");
     beep(tone_up, 200);
     delay(500);
   #elif 1 == MYMODEL
     lcd.setCursor(0,0);
     lcd.print("Free Mode       ");
     beep(tone_up, 200);
-    say_clearprecis();
   #endif
+  say_clearprecis();
   say_cleartime();
   eeprom_write_byte(0, MODLINFREE);
 }
 void say_up(){
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("Up  ");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("Up  ");
     beep(tone_up, 200);
     delay(500);
   #elif 1 == MYMODEL
     lcd.setCursor(0,0);
     lcd.print("Stopwatch       ");
     beep(tone_up, 200);
-    say_clearprecis();
   #endif
+  say_clearprecis();
   say_time();
   eeprom_write_byte(0, MODLINUP);
 }
 void say_down(){
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("DouN");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("DouN");
     beep(tone_down, 200);
     delay(500);
   #elif 1 == MYMODEL
     lcd.setCursor(0,0);
     lcd.print("Countdown       ");
     beep(tone_down, 200);
-    say_clearprecis();
   #endif
+  say_clearprecis();
   say_time();
   eeprom_write_byte(0, MODLINDOWN);
 }
 void say_dds() {
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("DDS ");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("DDS ");
     beep(tone_down, 200);
     delay(500);
   #elif 1 == MYMODEL
     lcd.setCursor(0,0);
     lcd.print("DDS Mode        ");
     beep(tone_down, 200);
-    say_clearprecis();
   #endif
+  say_clearprecis();
   say_time();
   eeprom_write_byte(0, MODLINDDS);
 }
 void say_fstop(){
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("F-ST");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("F-ST");
     beep(tone_up, 200);
     delay(500);
   #elif 1 == MYMODEL
@@ -463,8 +464,8 @@ void say_fstop(){
 }
 void say_precis() {
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("pREC");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("pREC");
     beep(tone_down, 200);
     delay(500);
   #elif 1 == MYMODEL
@@ -478,31 +479,31 @@ void say_precis() {
 }
 void say_test_strip() {
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("pROS");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("pROS");
     beep(tone_down, 200);
     delay(500);
   #elif 1 == MYMODEL
     lcd.setCursor(0,0);
     lcd.print("F/stop TestStrip");
     beep(tone_down, 200);
-    say_prec();
   #endif
+  say_prec();
   say_time();
   eeprom_write_byte(0, MODFSTTEST);
 }
 void say_fstopdown() {
   #if 0 == MYMODEL
-    Serial7Segment.write('v');
-    Serial7Segment.write("CFST");
+    Serial7Segment.write(0x76);
+    Serial7Segment.print("CFST");
     beep(tone_down, 200);
     delay(500);
   #elif 1 == MYMODEL
     lcd.setCursor(0,0);
     lcd.print("F/stop Countdown");
     beep(tone_down, 200);
-    say_prec();
   #endif
+  say_prec();
   say_time();
   eeprom_write_byte(0, MODFSTDOWN);
 }
