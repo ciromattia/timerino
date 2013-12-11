@@ -31,10 +31,11 @@
  The wiring schemes should come with this sketch, if not drop me a line.
  
  ### Pin Map Recap - DL002A ###
- D0: 7-Segment RX
- D1: 7-Segment TX
+ D0:
+ D1:
  D2: DI led bar
  D3: DCKI led bar
+ D4: 7-Segment RX
  D8: buzzer
  D9: progression switch (linear or f/stop) - maybe superfluous?
  D10: Relay signal
