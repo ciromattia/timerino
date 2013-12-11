@@ -65,6 +65,9 @@
   - 1: CMG-series (16x2 matrix LCD)
 */
 #define MYMODEL 0
+// change to LOW the following if you want relay be (de)activated on
+// pushbutton *release* instead of *press*
+#define ACTIONSIGNAL HIGH  
 
 #include <Keypad.h>
 #include <avr/eeprom.h>
@@ -756,7 +759,7 @@ void loop() {
     btnstatus = digitalRead(mainbtn);
     if (btnstatus != lastbtnstatus) {
       // main button has been toggled
-      if (btnstatus == HIGH) {
+      if (btnstatus == ACTIONSIGNAL) {
         // main button has been pressed
         btnhigh = true; 
       }
