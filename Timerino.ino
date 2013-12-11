@@ -33,14 +33,15 @@
  ### Pin Map Recap - DL002A ###
  D0:
  D1:
- D2: DI led bar
- D3: DCKI led bar
- D4: 7-Segment RX
- D8: buzzer
- D9: progression switch (linear or f/stop) - maybe superfluous?
- D10: Relay signal
- D11, D12, A0-A6: 4x4 keypad
+ D(2, 3, 4, 5, 6, 7, 8, 9): Keypad
+ D10: progression switch (linear or f/stop) - maybe superfluous? 
+ D11: Relay
+ D12: Buzzer
  D13: main button (pedal/pushbutton)
+ A(0, 1): Ledbar 
+ A2: 7 segment display
+ A3: Lum.Potenz.
+
  
  ### Pin Map Recap - CMG001A ###
  D0: 
@@ -87,7 +88,7 @@
   #define SHUT            0x0000  //8-bit 0 data
   // end defines for LCD Bar
   #include <SoftwareSerial.h>
-  SoftwareSerial Serial7Segment(1,4);
+  SoftwareSerial Serial7Segment(1,A2);
   const byte lcdrxpin = 4;
   const byte brightness = 16;  // change this to control 7-Segment brightness
 #elif 1 == MYMODEL
@@ -96,10 +97,10 @@
 #endif
 
 // define wired pins
-const byte buzzer = 8; // buzzer pin
+const byte buzzer = 12; // buzzer pin
 const byte mainbtn = 13; // main button (pushbutton/pedal) pin
-const byte relay = 10; // relay pin
-const byte selector = 9; // progression switch pin
+const byte relay = 11; // relay pin
+const byte selector = 10; // progression switch pin
 // define tone and delays
 const int tone_up = 600;
 const int tone_down = 300;
@@ -155,8 +156,8 @@ char keys[ROWS][COLS] = {
   {7,8,9,'C' },
   {'*','0','#','D' }
 };
-byte rowPins[ROWS] = {A4, A5, 11, 12}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {A0, A1, A2, A3}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {6, 7, 8, 9}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {2, 3, 4, 5}; //connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 
@@ -313,7 +314,7 @@ void say_cleartime() {
   #endif
 }
 void say_time() {
-  say_cleartime();
+  //say_cleartime();
   #if 0 == MYMODEL
     Serial7Segment.write(0x77); //Codice per invio funzioni specifiche
     Serial7Segment.write(0b00000100); //Accendo la virgola per 1 cifra decimale
@@ -718,9 +719,9 @@ void setup() {
 #endif
 
   /* ensure analog pins are set to INPUT */
-  pinMode(A0, INPUT);
-  pinMode(A1, INPUT);
-  pinMode(A2, INPUT);
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
   pinMode(A5, INPUT);
