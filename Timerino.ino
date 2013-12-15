@@ -35,8 +35,8 @@
  D1:
  D(2, 3, 4, 5, 6, 7, 8, 9): Keypad
  D10: progression switch (linear or f/stop) - maybe superfluous? 
- D11: Relay
- D12: Buzzer
+ D12: Relay
+ D11: Buzzer
  D13: main button (pedal/pushbutton)
  A(0, 1): Ledbar 
  A2: 7 segment display
@@ -48,8 +48,8 @@
  D1: 
  D(2, 3, 4, 5, 6, 7, 8, 9): Keypad
  D10: progression switch (linear or f/stop) - maybe superfluous? 
- D11: Relay
- D12: Buzzer
+ D12: Relay
+ D11: Buzzer
  D13: main button (pedal/pushbutton)
  A0-A6: LCD
 
@@ -69,7 +69,9 @@
 #define MYMODEL 0
 // change to LOW the following if you want relay be (de)activated on
 // pushbutton *release* instead of *press*
-#define ACTIONSIGNAL HIGH  
+#define ACTIONSIGNAL LOW  
+
+#define EPR 0 // Set to 1 if you want store in to the eeprom last using val and retrieve it at the new power on
 
 #include <Keypad.h>
 #include <avr/eeprom.h>
@@ -90,7 +92,7 @@
   #include <SoftwareSerial.h>
   SoftwareSerial Serial7Segment(1,A2);
   const byte lcdrxpin = A2;
-  const byte brightness = 16;  // change this to control 7-Segment brightness
+  const byte lumpin = A3; //Luminosity control
 #elif 1 == MYMODEL
   #include <LiquidCrystal.h>
   LiquidCrystal lcd(A0, A1, A2, A3, A4, A5);
@@ -127,6 +129,7 @@ const byte MODFSTDOWN = 0b00111;
 
 // Variables
 int i = 0;
+int brightness = 0;
 int time = 0;
 int time_succ;
 int appo_time;
@@ -134,13 +137,15 @@ int time_countdown;
 int time_dds;
 int time_fsttest;
 int time_fstdown;
-byte timer_mode = MODLINFREE; // timer mode (0 = lin.A, 1 = lin.B, 2 = lin.C, 3 = lin.D, 4 = fst.A, 5 = fst.B, 6 = fst.C, 7 = fst.D)
+byte timer_mode = MODLINFREE;
 long last_time = 0;
 long errlet = 0;
 int btnstatus = 0;         // main button status
 int lastbtnstatus = LOW;     // last main button status
 int selstatus = LOW;
 int lastselstatus = LOW;
+long lum;
+int lastlum;
 boolean running = false;
 boolean btnhigh = false;
 boolean firstpress = true;
@@ -168,7 +173,7 @@ void beep(int this_tone, int duration) {
 }
 void metronome() {
   if (running && time%10 == 0) {
-    beep(tone_down, 50);
+    beep(tone_down, 80);
   }
 }
 
@@ -203,8 +208,13 @@ void setup_display() {
     // Setup 7SegmentDisplay
     Serial7Segment.begin(9600); // Connect to 7-Segment display in serial mode
     Serial7Segment.write(0x76); // Display reset - brings cursors to the first char
+  
+    lum = analogRead(lumpin);
+    brightness = 100*lum/1024;
     Serial7Segment.write(0x7A);  // Brightness control command
     Serial7Segment.write((byte) brightness);
+    lastlum = lum;
+  
     Serial7Segment.write('A');
     LEDBar_set_LED_Index(0b000000111111111);
     delay(scrollTime);
@@ -402,7 +412,9 @@ void say_free() {
   #endif
   say_clearprecis();
   say_cleartime();
-  eeprom_write_byte(0, MODLINFREE);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODLINFREE);
+  #endif
 }
 void say_up(){
   #if 0 == MYMODEL
@@ -417,7 +429,10 @@ void say_up(){
   #endif
   say_clearprecis();
   say_time();
-  eeprom_write_byte(0, MODLINUP);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODLINUP);
+  #endif
+  
 }
 void say_down(){
   #if 0 == MYMODEL
@@ -432,7 +447,9 @@ void say_down(){
   #endif
   say_clearprecis();
   say_time();
-  eeprom_write_byte(0, MODLINDOWN);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODLINDOWN);
+  #endif
 }
 void say_dds() {
   #if 0 == MYMODEL
@@ -447,7 +464,9 @@ void say_dds() {
   #endif
   say_clearprecis();
   say_time();
-  eeprom_write_byte(0, MODLINDDS);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODLINDDS);
+  #endif  
 }
 void say_fstop(){
   #if 0 == MYMODEL
@@ -462,7 +481,9 @@ void say_fstop(){
     say_cleartime();
   #endif
   say_prec();
-  eeprom_write_byte(0, MODFSTFREE);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODFSTFREE);
+  #endif  
 }
 void say_precis() {
   #if 0 == MYMODEL
@@ -477,7 +498,9 @@ void say_precis() {
     say_cleartime();
   #endif
   say_prec();
-  eeprom_write_byte(0, MODFSTPREC);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODFSTPREC);
+  #endif  
 }
 void say_test_strip() {
   #if 0 == MYMODEL
@@ -492,7 +515,9 @@ void say_test_strip() {
   #endif
   say_prec();
   say_time();
-  eeprom_write_byte(0, MODFSTTEST);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODFSTTEST);
+  #endif    
 }
 void say_fstopdown() {
   #if 0 == MYMODEL
@@ -507,7 +532,9 @@ void say_fstopdown() {
   #endif
   say_prec();
   say_time();
-  eeprom_write_byte(0, MODFSTDOWN);
+  #if 1 == EPR
+    eeprom_write_byte(0, MODFSTDOWN);
+  #endif      
 }
 void say_timermode() {
   switch (timer_mode) {
@@ -580,19 +607,21 @@ void reset() {
   appo_time = 0;
 }
 
-void load_eeprom() {
-  timer_mode = eeprom_read_byte(0);
-  // if mode is not valid set the first one and return
-  if ((timer_mode & 0b11000) > 0) {
-    timer_mode = MODLINFREE;
-    return;
+#if 1 == EPR
+  void load_eeprom() {
+    timer_mode = eeprom_read_byte(0);
+    // if mode is not valid set the first one and return
+    if ((timer_mode & 0b11000) > 0) {
+      timer_mode = MODLINFREE;
+      return;
+    }
+    time_countdown = eeprom_read_word((uint16_t *)1);  // 2 byte
+    time_dds = eeprom_read_word((uint16_t *)3);        // 2 byte
+    time_fsttest = eeprom_read_word((uint16_t *)5);    // 2 byte
+    time_fstdown = eeprom_read_word((uint16_t *)7);    // 2 byte
+    precis = eeprom_read_word((uint16_t *)9);          // 2 byte
   }
-  time_countdown = eeprom_read_word((uint16_t *)1);  // 2 byte
-  time_dds = eeprom_read_word((uint16_t *)3);        // 2 byte
-  time_fsttest = eeprom_read_word((uint16_t *)5);    // 2 byte
-  time_fstdown = eeprom_read_word((uint16_t *)7);    // 2 byte
-  precis = eeprom_read_word((uint16_t *)9);          // 2 byte
-}
+#endif      
 
 void init_timermode() {
   switch (timer_mode) {
@@ -656,6 +685,8 @@ void read_key() {
           time = 1;
         appo_time = time;
         say_time();
+      } else if (timer_mode == MODLINUP || timer_mode == MODLINDOWN || timer_mode == MODLINDDS || timer_mode == MODFSTTEST) {
+        reset();
       }
       break;
 
@@ -679,16 +710,56 @@ void read_key() {
         say_time();
       } else if (timer_mode == MODFSTPREC) { // Imposta precisione decodifico i numeri
         switch (key) {
-          case 1:  precis = 1; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 2:  precis = 2; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 3:  precis = 3; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 4:  precis = 4; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 5:  precis = 6; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 6:  precis = 8; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 7:  precis = 12; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 8:  precis = 24; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case 9:  precis = 32; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
-          case '0':  precis = 48; say_prec(); eeprom_write_word((uint16_t *)9, precis); break;
+          case 1:  precis = 1; say_prec();
+                    #if 1 == EPR
+                      eprom_write_word((uint16_t *)9, precis);
+                    #endif
+                    break;
+          case 2:  precis = 2; say_prec();
+                   #if 1 == EPR
+                      eeprom_write_word((uint16_t *)9, precis);
+                   #endif
+                   break;
+          case 3:  precis = 3; say_prec();
+                   #if 1 == EPR
+                      eeprom_write_word((uint16_t *)9, precis);
+                   #endif
+                   break;
+          case 4:  precis = 4; say_prec();
+                    #if 1 == EPR
+                      eeprom_write_word((uint16_t *)9, precis);
+                    #endif  
+                    break;
+          case 5:  precis = 6; say_prec();
+                    #if 1 == EPR          
+                      eeprom_write_word((uint16_t *)9, precis);
+                    #endif 
+                    break;
+          case 6:  precis = 8; say_prec();
+                    #if 1 == EPR          
+                      eeprom_write_word((uint16_t *)9, precis);
+                    #endif  
+                    break;
+          case 7:  precis = 12; say_prec();
+                    #if 1 == EPR          
+                      eeprom_write_word((uint16_t *)9, precis);
+                    #endif  
+                    break;
+          case 8:  precis = 24; say_prec();
+                    #if 1 == EPR          
+                      eeprom_write_word((uint16_t *)9, precis);
+                    #endif  
+                    break;
+          case 9:  precis = 32; say_prec();
+                    #if 1 == EPR          
+                      eeprom_write_word((uint16_t *)9, precis);
+                    #endif
+                    break;
+          case '0':  precis = 48; say_prec();
+                    #if 1 == EPR          
+                      eeprom_write_word((uint16_t *)9, precis);
+                    #endif
+                    break;
           default: break;
         }
       } else {
@@ -708,8 +779,8 @@ void read_key() {
 }
 
 void setup() {
-  //Serial.begin(9600);
-  //Serial.println(">>> Debug <<<");
+//  Serial.begin(9600);
+//  Serial.println(">>> Debug <<<");
   
 #if 0 == MYMODEL
   // init LED Bar
@@ -721,16 +792,24 @@ void setup() {
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
   pinMode(A2, OUTPUT);
+
+#if 0 == MYMODEL  
+  pinMode(lumpin, INPUT);
+#elif 1 == MYMODEL
   pinMode(A3, OUTPUT);
+#endif
+  
   pinMode(A4, OUTPUT);
   pinMode(A5, OUTPUT);
   pinMode(buzzer, OUTPUT);      // Buzzer pin in Output
-  pinMode(relay, OUTPUT);      // Relé pin in Output
+  pinMode(relay, OUTPUT);      // Rel� pin in Output
   pinMode(mainbtn, INPUT);       // Pedale/pulsante pin in Input
-  pinMode(selector, INPUT);       // Selettore modalità (lineare/fstop) in Input
+  pinMode(selector, INPUT);       // Selettore modalit� (lineare/fstop) in Input
 
   // read from EEPROM stored values
-  load_eeprom();
+  #if 1 == EPR
+    load_eeprom();
+  #endif
   
   // Setup display
   setup_display();
@@ -776,6 +855,17 @@ void loop() {
     lastselstatus = selstatus;
     timer_mode = (selstatus == HIGH) ? MODFSTFREE : MODLINFREE;
     say_timermode();
+  }
+  
+  lum = analogRead(lumpin);
+  
+  
+  if (lum < lastlum-10 || lum > lastlum+10) { 
+  
+    brightness = 100*lum/1024;
+    Serial7Segment.write(0x7A);  // Brightness control command
+    Serial7Segment.write((byte) brightness);
+    lastlum = lum;
   }
 
   if (running && btnhigh) {
@@ -830,7 +920,9 @@ void loop() {
         break;
       case MODLINDOWN:
         time_countdown = appo_time;
-        eeprom_write_word((uint16_t *)1, time_countdown);
+        #if 1 == EPR
+          eeprom_write_word((uint16_t *)1, time_countdown);
+        #endif
         if (time > 0) {
           digitalWrite(relay, HIGH); // powerup the relay
           running = true;
@@ -840,7 +932,9 @@ void loop() {
         break;
       case MODLINDDS:
         time_dds = appo_time;
-        eeprom_write_word((uint16_t *)3, time_dds);
+        #if 1 == EPR
+             eeprom_write_word((uint16_t *)3, time_dds);
+        #endif
         if (time > 0) {
           digitalWrite(relay, HIGH); // powerup the relay
           running = true;
@@ -857,7 +951,9 @@ void loop() {
         break;
       case MODFSTTEST:
         time_fsttest = appo_time;
-        eeprom_write_word((uint16_t *)5, time_fsttest);
+        #if 1 == EPR
+             eeprom_write_word((uint16_t *)5, time_fsttest);
+        #endif
         digitalWrite(relay, HIGH); // powerup the relay
         running = true;
         last_time = millis(); // reset timer counter
@@ -869,7 +965,9 @@ void loop() {
         break;
       case MODFSTDOWN:
         time_fstdown = appo_time;
-        eeprom_write_word((uint16_t *)7, time_fstdown);
+        #if 1 == EPR
+             eeprom_write_word((uint16_t *)7, time_fstdown);
+        #endif
         if (time > 0) {
           digitalWrite(relay, HIGH); // powerup the relay
           running = true;
