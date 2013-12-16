@@ -62,23 +62,14 @@
  TODO: implement eventListener for keyboard to manage key HOLDing
  */
 
-/* set the model accordingly:
-  - 0: DL-series (7segment LCD)
-  - 1: CMG-series (16x2 matrix LCD)
-*/
-#define MYMODEL 0
-// change to LOW the following if you want relay be (de)activated on
-// pushbutton *release* instead of *press*
-#define ACTIONSIGNAL LOW  
-
-#define EPR 0 // Set to 1 if you want store in to the eeprom last using val and retrieve it at the new power on
-
 #include <Keypad.h>
 #include <avr/eeprom.h>
 
+#include "Timerino.h"  // include personal conf
+
 #if 0 == MYMODEL
-  // defines for LED Bar. They're set on pins 2-3, change accordingly
-  // if you wired the LED Bar to another location
+  // defines for LED Bar. They're set on analog pins 0-1, change accordingly
+  // if you wired the LED Bar to another location (refer to http://arduino.cc/en/Reference/PortManipulation)
   #define LEDBar_DDRData  DDRC
   #define LEDBar_DDRClk   DDRC
   #define LEDBar_PORTData PORTC
@@ -326,10 +317,10 @@ void say_cleartime() {
 void say_time() {
   //say_cleartime();
   #if 0 == MYMODEL
-    Serial7Segment.write(0x77); //Codice per invio funzioni specifiche
-    Serial7Segment.write(0b00000100); //Accendo la virgola per 1 cifra decimale
-    sprintf(_buffer, "%04i", time); //Converte il tempo in una striga con gli zeri in testa
-    Serial7Segment.write(_buffer); // Stampo il tempo  
+    Serial7Segment.write(0x77);
+    Serial7Segment.write(0b00000100); // light up 1 decimal point
+    sprintf(_buffer, "%04i", time);
+    Serial7Segment.write(_buffer);
   #elif 1 == MYMODEL
     float ftime = time > 0 ? (float)time / 10 : 0.0;
     dtostrf(ftime, 3, 1, _buffer);
@@ -690,8 +681,7 @@ void read_key() {
       }
       break;
 
-    case '#': // Abilita disabilita suono su alcune modeioni
-      //mute = (timer_mode == MODLINUP || timer_mode == MODLINDOWN || timer_mode == MODLINDDS || timer_mode == MODFSTTEST);
+    case '#':
       if (timer_mode == MODFSTDOWN) {
         // Step up
         mult = pow(2.0, (1.0/precis));
@@ -708,11 +698,11 @@ void read_key() {
         say_up();
         appo_time = time;
         say_time();
-      } else if (timer_mode == MODFSTPREC) { // Imposta precisione decodifico i numeri
+      } else if (timer_mode == MODFSTPREC) { // set precision
         switch (key) {
           case 1:  precis = 1; say_prec();
                     #if 1 == EPR
-                      eprom_write_word((uint16_t *)9, precis);
+                      eeprom_write_word((uint16_t *)9, precis);
                     #endif
                     break;
           case 2:  precis = 2; say_prec();
@@ -801,10 +791,10 @@ void setup() {
   
   pinMode(A4, OUTPUT);
   pinMode(A5, OUTPUT);
-  pinMode(buzzer, OUTPUT);      // Buzzer pin in Output
-  pinMode(relay, OUTPUT);      // Rel� pin in Output
-  pinMode(mainbtn, INPUT);       // Pedale/pulsante pin in Input
-  pinMode(selector, INPUT);       // Selettore modalit� (lineare/fstop) in Input
+  pinMode(buzzer, OUTPUT);
+  pinMode(relay, OUTPUT);
+  pinMode(mainbtn, INPUT);
+  pinMode(selector, INPUT);
 
   // read from EEPROM stored values
   #if 1 == EPR
@@ -840,7 +830,7 @@ void loop() {
     btnstatus = digitalRead(mainbtn);
     if (btnstatus != lastbtnstatus) {
       // main button has been toggled
-      if (btnstatus == ACTIONSIGNAL) {
+      if (HIGH == btnstatus) {
         // main button has been pressed
         btnhigh = true; 
       }
