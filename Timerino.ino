@@ -846,17 +846,17 @@ void loop() {
     timer_mode = (selstatus == HIGH) ? MODFSTFREE : MODLINFREE;
     say_timermode();
   }
-  
+
+#if 0 == MYMODEL
   lum = analogRead(lumpin);
   
-  
-  if (lum < lastlum-10 || lum > lastlum+10) { 
-  
+  if (lum < lastlum-10 || lum > lastlum+10) {
     brightness = 100*lum/1024;
     Serial7Segment.write(0x7A);  // Brightness control command
     Serial7Segment.write((byte) brightness);
     lastlum = lum;
   }
+#endif
 
   if (running && btnhigh) {
     // shut down the relay and pause the timer
