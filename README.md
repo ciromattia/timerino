@@ -1,4 +1,8 @@
-﻿# TIMERINO
+TIMERINO
+===
+
+## 2023 Update: as noted in [Daniele's comment](https://github.com/ciromattia/timerino/issues/3#issuecomment-1406243036) there's a v3.01 for Timerino further developed by Alessio Bortoletto which you can find [here](https://alessiobortoletto.wixsite.com/alessiobortoletto/projects-2).
+
 
 **Timerino** is a programmable darkroom enlarger timer built upon an Arduino microcontroller.
 Currently it has _linear_ and _geometric_ (f/stop) exposure functions.
@@ -9,7 +13,8 @@ Currently supports 2 models which differs only in the display:
 
 
 ## CREDITS
-**Timerino** is made by Daniele Lucarelli and [Ciro Mattia Gonano](http://github.com/ciromattia).  
+**Timerino** is made by [Daniele Lucarelli](https://github.com/DanieleLucarelli) and [Ciro Mattia Gonano](http://github.com/ciromattia).  
+[Timerino v3.01](https://alessiobortoletto.wixsite.com/alessiobortoletto/projects-2) has been further developed by Alession Bortoletto.  
 It's developed after Daniele Lucarelli's version on
 [analogica.it](http://www.analogica.it/upgrade-timer-con-keypad-t6797.html)
 
